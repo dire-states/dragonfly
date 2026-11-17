@@ -36,7 +36,7 @@ The commands use Lotus's default repos (`~/.lotus`, `~/.lotusminer`) and these v
 Presealing creates the genesis miner's sectors before the chain exists. For each sector, `lotus-seed` runs AddPiece on random data, then PreCommit1, PreCommit2 and FinalizeSector, and drops the unsealed copy. There is no Commit1/Commit2 SNARK step: the genesis simply trusts the resulting CommR. It also writes one market deal per sector.
 
 ```sh
-lotus-seed --sector-dir=$HOME/genesis-sectors pre-seal \
+lotus-seed --sector-dir=/opt/filecoin/build/fly-genesis pre-seal \
   --miner-addr t01000 \
   --sector-size 512MiB \
   --num-sectors 4
@@ -45,7 +45,7 @@ lotus-seed --sector-dir=$HOME/genesis-sectors pre-seal \
 > [!NOTE]
 > `--sector-dir` is a global flag, so it goes before `pre-seal`. Never use `--fake-sectors`: butterfly verifies real Winning and Window PoSt, so the genesis miner must hold real replicas.
 
-| Output in `~/genesis-sectors/` | What it is |
+| Output in `/opt/filecoin/build/fly-genesis//` | What it is |
 |---|---|
 | `sealed/s-t01000-N` | The sealed replicas (512MiB each) |
 | `cache/s-t01000-N/` | `p_aux`, `t_aux` and `tree-r-last`, needed for PoSt |
@@ -65,7 +65,7 @@ Check:
 
 ```sh
 ls ~/genesis-sectors
-jq '."t01000".Sectors | length' ~/genesis-sectors/pre-seal-t01000.json   # 4
+jq '."t01000".Sectors | length' /opt/filecoin/build/fly-genesis/pre-seal-t01000.json   # 4
 ```
 
 ## 2 · Create the genesis CAR
@@ -76,9 +76,9 @@ Public butterfly's genesis is compiled into the binary (`build/genesis/butterfly
 > **Do steps 2–4 in one go.** The genesis timestamp is the moment you run `genesis car`. If the miner starts hours later, the chain begins with a long run of null rounds.
 
 ```sh
-mkdir -p ~/genesis && cd ~/genesis
+mkdir -p /opt/filecoin/build/fly-genesis && cd /opt/filecoin/build/fly-genesis
 lotus-seed genesis new --network-name=dragonfly genesis.json
-lotus-seed genesis add-miner genesis.json ~/genesis-sectors/pre-seal-t01000.json
+lotus-seed genesis add-miner genesis.json /opt/filecoin/build/fly-genesis/pre-seal-t01000.json
 lotus-seed genesis car -o dragonfly.car genesis.json
 ```
 
@@ -97,14 +97,14 @@ ls -la dragonfly.car
 **Terminal A:**
 
 ```sh
-lotus daemon --genesis=$HOME/genesis/dragonfly.car --bootstrap=false
+lotus daemon --genesis=/opt/filecoin/build/fly-genesis/dragonfly.car --bootstrap=false
 ```
 
 **Terminal B:**
 
 ```sh
 lotus wait-api
-lotus wallet import --as-default ~/genesis-sectors/pre-seal-t01000.key
+lotus wallet import --as-default /opt/filecoin/build/fly-genesis/pre-seal-t01000.key
 ```
 
 Check:
@@ -123,8 +123,8 @@ In Terminal B:
 ```sh
 lotus-miner init --genesis-miner --actor=t01000 \
   --sector-size=512MiB \
-  --pre-sealed-sectors=$HOME/genesis-sectors \
-  --pre-sealed-metadata=$HOME/genesis-sectors/pre-seal-t01000.json \
+  --pre-sealed-sectors=/opt/filecoin/build/fly-genesis \
+  --pre-sealed-metadata=/opt/filecoin/build/fly-genesis/pre-seal-t01000.json \
   --nosync
 lotus-miner run --nosync
 ```
