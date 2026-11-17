@@ -45,7 +45,7 @@ lotus-seed --sector-dir=/opt/filecoin/build/fly-genesis pre-seal \
 > [!NOTE]
 > `--sector-dir` is a global flag, so it goes before `pre-seal`. Never use `--fake-sectors`: butterfly verifies real Winning and Window PoSt, so the genesis miner must hold real replicas.
 
-| Output in `/opt/filecoin/build/fly-genesis//` | What it is |
+| Output in `/opt/filecoin/build/fly-genesis/` | What it is |
 |---|---|
 | `sealed/s-t01000-N` | The sealed replicas (512MiB each) |
 | `cache/s-t01000-N/` | `p_aux`, `t_aux` and `tree-r-last`, needed for PoSt |
@@ -64,7 +64,7 @@ Cost: 512MiB SDR runs on CPU in minutes and needs a few GiB of temporary cache. 
 Check:
 
 ```sh
-ls ~/genesis-sectors
+ls /opt/filecoin/build/fly-genesis
 jq '."t01000".Sectors | length' /opt/filecoin/build/fly-genesis/pre-seal-t01000.json   # 4
 ```
 
